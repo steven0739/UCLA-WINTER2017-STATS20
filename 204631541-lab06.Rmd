@@ -1,0 +1,191 @@
+```{r}
+#1a.
+gamblersRuin <- function(n1, n2, p) {
+  len <- 0
+  repeat {
+    len <- len + 1
+    result <- rbinom(1, 1, p)
+    if(result == 1) {
+      n1 <- n1 + 1
+      n2 <- n2 - 1
+    }
+    else {
+      n1 <- n1 - 1
+      n2 <- n2 + 1
+    }
+    if(n1 == 0 || n2 ==0) {
+      break
+    }
+  }
+  return(c('len' = len, 'n1' = n1, 'n2' = n2))
+}
+set.seed(2017)
+gamblersRuin(n1 = 10, n2 = 10, p = 0.5)
+```
+
+```{r}
+#1b.
+res <- matrix(nrow = 10000, ncol = 3)
+for(n in 1:10000) {
+  res[n, ] <- gamblersRuin(n1 = 5, n2 = 10, p = 0.5)
+}
+head(res, 10)
+```
+
+```{r}
+#1c.
+onebroke <- nrow(res[res[, 2] == 0, ]) / 10000
+onebroke
+ntoss <- mean(res[ , 1])
+ntoss
+```
+My first result is 0.6675, which is approximately 2/3.
+My second result is 51.0237, which is close to 50.
+
+```{r}
+#1d.
+res1 <- matrix(nrow = 10000, ncol = 3)
+for(n in 1:10000) {
+  res1[n, ] <- gamblersRuin(n1 = 5, n2 = 10000, p = 0.49)
+}
+head(res1, 10)
+onebroke1 <- nrow(res1[res1[, 2] == 0, ]) / 10000
+onebroke1
+ntoss1 <- mean(res1[ , 1])
+ntoss1
+```
+
+```{r}
+#2a.
+
+#i.
+colSumsFor <- function(x) {
+  v <- vector(length = ncol(x)) 
+  for (n in 1:ncol(x)) {
+      v[n] <- sum(x[ ,n])
+  }
+  v
+}
+
+#ii.
+colSumsFor2 <- function(x) {
+  x <- as.matrix(x)
+  v <- vector(length = ncol(x))
+  for(n in 1:ncol(x)) {
+    v[n] <- sum(x[ ,n])
+  }
+  v
+}
+
+#iii.
+colSumsApply <- function(x) {
+  apply(as.matrix(x), 2, sum)
+}
+
+#iv.
+colSumsSapply <- function(x) {
+  sapply(as.data.frame(x), sum)
+}
+
+#v.
+colSumsLapply <- function(x) {
+  do.call(cbind, lapply(as.data.frame(x), sum))
+}
+
+#vi.
+colSumsCrossprod <- function(x) {
+  crossprod(rep(1, nrow(x)), as.matrix(x))[1, ]
+} 
+
+mat <- as.matrix(iris[, 1:4]) 
+df <- iris[, 1:4]
+
+colSumsFor(mat)
+colSumsFor2(mat)
+colSumsApply(mat)
+colSumsSapply(mat)
+colSumsLapply(mat)
+colSumsCrossprod(mat)
+colSums(mat)
+```
+
+```{r}
+#2b.
+df <- as.data.frame(matrix(rnorm(5000), 50, 100))
+colSumsDf <- rbind(colSumsFor = system.time(replicate(n = 10000, colSumsFor(df))), 
+                   colSumsFor2 = system.time(replicate(n = 10000, colSumsFor2(df))), 
+                   colSumsApply = system.time(replicate(n = 10000, colSumsApply(df))), 
+                   colSumsSapply = system.time(replicate(n = 10000, colSumsSapply(df))), 
+                   colSumsLapply = system.time(replicate(n = 10000, colSumsLapply(df))), 
+                   colSumsCrossprod = system.time(replicate(n = 10000, colSumsCrossprod(df))),
+                   colSums = system.time(replicate(n = 10000, colSums(df))))
+colSumsDf
+```
+So colSumsLapply is the fastest one, and colSumsFor is the slowest one.
+
+```{r}
+#2c.
+mat <- matrix(rnorm(5000), 50, 100)
+colSumsMat <- rbind(colSumsFor = system.time(replicate(n = 10000, colSumsFor(mat))),
+                    colSumsFor2 = system.time(replicate(n = 10000, colSumsFor2(mat))), 
+                    colSumsApply = system.time(replicate(n = 10000, colSumsApply(mat))), 
+                    colSumsSapply = system.time(replicate(n = 10000, colSumsSapply(mat))), 
+                    colSumsLapply = system.time(replicate(n = 10000, colSumsLapply(mat))), 
+                    colSumsCrossprod = system.time(replicate(n = 10000, colSumsCrossprod(mat))),
+                    colSums = system.time(replicate(n = 10000, colSums(mat))))
+colSumsMat                                                                  
+```
+So colSums is the fastest one, and colSumsSapply is the slowest one.
+No, the order is different.
+
+```{r}
+#3a.
+subiris <- iris[50:150, ]
+fit <- lm(Sepal.Length ~ Petal.Length, data = subiris)
+summary(fit)
+```
+The intercept is 3.23649, and the slope is 0.61853.
+Multiple R-squared is 0.676.
+
+```{r}
+#3b.
+coefs <- coef(fit)
+plot(subiris$Sepal.Length ~ subiris$Petal.Length, xlab = 'Petal.Length', ylab = 'Sepal.Length', cex = 0.8)
+abline(coefs)
+```
+
+```{r}
+#3c.
+par(mfrow = c(2, 2))
+plot(fit, 1, id.n = 3)
+plot(fit, 2, id.n = 3)
+plot(fit, 3, id.n = 3)
+plot(fit, 5, id.n = 3)
+```
+
+id.n equals to 3.
+point 58 is an outlier and point 1, 2 are high leverage points.
+
+```{r}
+#3d.
+fitted <- fit$fitted.values
+residual <- fit$residuals
+plot(fitted, residual, xlab = 'fitted.values', ylab = 'residuals', cex = 0.8)
+```
+
+```{r}
+#3e.
+y <- subiris$Sepal.Length
+1 - (var(residual)) / var(y)
+```
+
+
+
+
+
+
+
+
+
+
+

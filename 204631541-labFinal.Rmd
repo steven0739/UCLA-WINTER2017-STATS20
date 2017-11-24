@@ -1,0 +1,96 @@
+```{r}
+#1a.
+set.seed(2017)
+v <- c(LETTERS, '!', '?')
+o <- vector()
+count <- 1
+repeat {
+  o[count] <- sample(v, 1)
+  if(length(unique(o)) == 28) {
+    break
+  }
+  count <- count + 1
+}
+length(o)
+```
+
+```{r}
+#1b.
+set.seed(2017)
+couponCollector <- function(v) {
+  o <- vector()
+  count <- 1
+  repeat {
+    o[count] <- sample(v, 1)
+    if(length(unique(o)) == 28) {
+      break
+    }
+    count <- count + 1
+  }
+  return(count)
+}
+```
+
+```{r}
+#1c.
+v <- c(LETTERS, '!', '?')
+lens <- vector(length = 500)
+set.seed(2017)
+for(i in 1:500) {
+  lens[i] <- couponCollector(v)
+}
+mean(lens)
+hist(lens)
+```
+My result is 107.9, which is close to 109.9608
+
+```{r}
+#1d.
+v <- c(rep(LETTERS, 5), '!', '?')
+lens <- vector(length = 500)
+set.seed(2017)
+for(i in 1:500) {
+  lens[i] <- couponCollector(v)
+}
+mean(lens)
+mean(lens) / 107.9
+hist(lens)
+```
+My result is 208.134, it's 1.928953 times of before.
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+#2a.
+sum(is.na(flights$dep_time))
+apply(is.na(flights), 2, sum)
+```
+
+```{r}
+#2b.
+flights$num_cancel <- as.numeric(is.na(flights$dep_time))
+tapp <- tapply(flights$num_cancel, flights$month, sum)
+barplot(tapp)
+```
+
+```{r}
+#2c.
+ua <- subset(flights, carrier == 'UA')
+dl <- subset(flights, carrier == 'DL')
+t.test(ua$dep_delay, dl$dep_delay, alternative = "two.sided")
+```
+No, it's not significant. UA delays longer.
+
+```{r}
+#2d.
+lax <- subset(flights, dest == 'LAX')
+fit <- lm(arr_delay ~ dep_delay, data = lax)
+plot(lax$dep_delay, lax$arr_delay)
+abline(fit$coefficients)
+coef(fit)
+```
+
+
+
+
+

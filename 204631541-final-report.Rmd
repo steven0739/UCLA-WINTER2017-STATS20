@@ -1,0 +1,223 @@
+#######################
+#Final Report         #
+#Stats 20, Winter 2017#
+#Yang Pochao 204631541#
+#######################
+
+Part I: Introduction
+
+We are provided with three datasets. The first one is edmunds, which describes a lead being submitted to Edmunds.com about a car that a consumer expressed interest in. The second one is IRS, which is aggregated information from IRS tax returns based on the returns coming from residents of
+different zip codes from the year 2013. The last one is towers, which is information about individual cell towers located in Los Angeles.
+
+We first clean the datasets, and then pick some useful and interesting variables to examine by subsetting. Therefore, we then generate some t-test and linear models to test some hypothesises we make and get a more explicit understanding of the datasets graphically and statistically.
+
+For people who want to buy a car, when they are using edmunds website, they can get information back from the database, which is modified and analyzed by us. 
+If people are interested in how cell towers are distributed in each state, or each small region represented by a zip code, our dataset may be really helpful.
+Irs dataset is the most important one according to my understanding, since tax report for individuals and families can provide a lot information to the government when they are making policies.
+
+Part II: Data
+```{r setup, include=FALSE}
+#Basic set-up
+library("haven")
+library("readxl")
+library("dplyr")
+library("knitr")
+library("ggplot2")
+library("scales")
+library("tidyverse")
+library("lubridate")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+1. Dimensions of towers and edmunds and irs are 
+[1] 9248   22
+[1] 2445924      24
+[1] 288 111
+2. Columns of towers and edmunds and irs after cleaning are
+[1] 5
+[1] 11
+[1] 8
+```{r}
+#Load the data
+
+###Load or read
+towers.all <- read.csv("la-cell-towers.csv", header = TRUE)
+edmunds.all <- read_dta("edmunds.dta")
+irs.all <- read_excel("irs-la-zip.xls")
+
+###Observationos of each dataset
+#Edmunds: a lead being submitted to Edmunds.com about a car that a consumer expressed interest in.
+#Towers: individual cell towers located in Los Angeles
+#Irs: IRS tax returns from each resident from 2013.
+
+###Dimensions of each dataset
+#dim(towers.all)
+#dim(edmunds.all)
+#dim(irs.all)
+
+###Drop unneeded variables for each dataset
+towers <- towers.all[ , c("OBJECTID", "city", "ZIP", "longitude", "latitude")]
+edmunds <- edmunds.all[ , c("lead_id", "lead_date", "visitor_key", "make", "model", "model_year", "msrp", "dealer_state", "dealer_zip")]
+irs <- irs.all[ , c("ZIPCODE", "N1", "MARS1", "MARS2", "MARS4", "NUMDEP", "A00100")]
+
+###Number of variables of each dataset after dropping
+#ncol(towers)
+#ncol(edmunds)
+#ncol(irs)
+```
+```{r}
+#Clean the data
+
+###Edmunds data
+#####Missing values
+edmunds <- replace(edmunds, edmunds == c("", "NA", "INA"), NA)
+#####Fix variable make
+edmunds$make <- toupper(as.factor(edmunds$make))
+#####Fix class of some variables
+edmunds$model_year <- as.numeric(edmunds$model_year)
+edmunds$msrp <- as.numeric(edmunds$msrp)
+edmunds$dealer_zip <- as.numeric(edmunds$dealer_zip)
+#####Create two variables
+edmunds <- mutate(edmunds, lead_year = format(as.Date(edmunds$lead_date, "%Y-%m-%d"), "%Y"), lead_month = format(as.Date(edmunds$lead_date, "%Y-%m-%d"), "%Y-%m"))
+###Irs data
+#####Create one variable
+irs$AGIperReturn <- irs$A00100/irs$N1
+
+###Cell towers data
+```
+
+
+
+1. It gets a large increase in 2013-12. The trend is basically increasing, and later with small variations.
+2. CA has the most leads.
+4. Toyota is the most popular one.
+5. No retailing price isn't determined by the popularity of makes.
+
+1. No, I don't want to test any hypothesis.
+
+1. 91042 is the zip code with most cell towers.
+```{r}
+#Data summarization
+
+###Edmunds data
+#####Generate a line graph
+plot(table(edmunds$lead_month), "l", xlab = "month", ylab = "Lead_month", main = "Lead_Month")
+#####Generate a barplot
+top20 <- head(sort(table(edmunds$dealer_state), d = TRUE), 20)
+barplot(top20, main = "Number of Leads For The Top 20 Dealer State", xlab = "Dealer State", ylab = "Number of Leads")
+#####Extract a subset
+subedmunds <- subset(edmunds, lead_year == "2014" & dealer_state == "CA")
+#####Generate a barplot
+top20_make <- head(sort(table(subedmunds$make), decreasing = TRUE), 20)
+barplot(top20_make, main = "Number of Leads For The Top 20 Make", xlab = "Make", ylab = "Number of Leads")
+#####Generate a boxplot
+submsrp <- list(top1_make = subset(subedmunds$msrp, subedmunds$make == "TOYOTA"), top2_make = subset(subedmunds$msrp, subedmunds$make == "HONDA"), other_make = subset(subedmunds$msrp, subedmunds$make != "TOYOTA" & subedmunds$make != "HONDA"))
+boxplot(submsrp)
+#####Create a table
+subdealer_zip <- group_by(subedmunds, dealer_zip)
+aggrtable <- summarise(subdealer_zip, msrp.med = median(msrp, na.rm = TRUE), lead.count = length(which(dealer_zip == dealer_zip)))
+
+###Irs data
+#####Create a scatter plot
+newirs <- irs[ ,c("N1","MARS1","MARS2","MARS4","NUMDEP","A00100")]
+pairs(irs)
+
+###Cell towers data
+#####Generate a barplot
+barplot(head(sort(table(towers$ZIP), decreasing = T), 20), xlab = "zip code", ylab = "zip code count", main = "barplot for top 20 ZIP")
+citytowers <- subset(towers$city, towers$ZIP == "91042")
+#####Create a table
+subzip <- group_by(towers, ZIP)
+aggrtable2 <- summarise(subzip, cel.count = length(which(ZIP == ZIP)), lon.med = median(longitude, na.rm = TRUE), lat.med = median(latitude, na.rm = TRUE))
+```
+
+
+
+1. Merges dataset has 13 elements.
+```{r}
+#Merge or join datasets
+
+###Append the information
+merge1 <- merge(irs, aggrtable, by.x = "ZIPCODE", by.y = "dealer_zip", all.x = TRUE)
+merge2 <- merge(merge1, aggrtable2, by.x = "ZIPCODE", by.y = "ZIP", all.x = TRUE)
+
+###Number of dimensions
+#ncol(merge2)
+```
+
+Part III: Statistical Inference
+```{r}
+#T-test
+
+###Perform test
+t.test(submsrp$top1_make, submsrp$top2_make, "two.sided")
+t.test(submsrp$top1_make, submsrp$other_make, "two.sided")
+t.test(submsrp$top2_make, submsrp$other_make, "two.sided")
+```
+
+
+
+1. I think the variable the median suggested retail price of the lead and the adjusted gross income per number of returns in the dataset has a positive linear relationship.
+```{r}
+#Linear regression
+
+###Linear relationship
+#pairs(merge2)
+fit <- lm(merge2$msrp.med ~ merge2$AGIperReturn)
+
+###Fit a linear model
+#coef(fit)
+summary(fit)
+par(mfrow = c(2, 2))
+plot(fit, 1)
+plot(fit, 2)
+plot(fit, 3)
+plot(fit, 5)
+```
+
+```{r, error = TRUE}
+#Custom functions
+
+###Create a function
+my.function <- function(zip) {
+  if(anyNA(match(zip, merge2$ZIPCODE))) {
+    stop("input includes non-recorded zip code")
+  }
+  result <- data.frame(zip = numeric(length = length(zip)), cel.count = numeric(length =
+  length(zip)), N1 = numeric(length = length(zip)), lead.count = numeric(length = length(zip)))
+  for(i in 1:length(zip)) {
+    funczip <- subset(merge2, ZIPCODE == zip[i])
+    result[i, 2:4] <- summarise(funczip, cel.count = cel.count, N1 = N1, lead.count = lead.count)
+    result[i, 1] <- zip[i]
+  }
+  result
+}
+#my.function(zip = c("90001", "19428", "00033"))
+#my.function(zip = c("90001", "19428", "00033", "1004"))
+#my.function(zip = c("90001", "19428", "00033", NA))
+```
+
+
+
+1. For all the three t-tests performed before, since p-value all smaller than 0.01, which suggested statistically significant, all the three null hypothesises are rejected. The two variables being compared are not same with each other.
+2. Since the coefficients are 
+        (Intercept) merge2$AGIperReturn 
+        26801.63197            93.68374 
+therefore we know that if AGIperReturn increased by 1, then the median msrp will increase by 93.68374 correspondingly. If we want to improve our model, we have to eliminate outliers since they are very influencing.
+3. Tests of my functinos all print out the error message I want to see since there's invalid zip code in all of the three outputs.
+"Error in my.function(zip = c("90001", "19428", "00033", NA)) : input includes non-recorded zip code"
+```{r}
+#Results and conclusions
+
+###The result of t-tests
+
+###The result of linear model
+
+###The result of my function
+#my.function(zip = c("90001", "19428", "00033"))
+#my.function(zip = c("90001", "19428", "00033", "1004"))
+#my.function(zip = c("90001", "19428", "00033", NA))
+```
+

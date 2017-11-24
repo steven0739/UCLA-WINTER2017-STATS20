@@ -1,0 +1,87 @@
+---
+title: "204631541-lab01"
+output: html_document
+---
+
+```{r}
+#1
+system ("who", intern = TRUE)
+```
+> StevenYang console  Dec 31 03:02
+
+```{r, eval = FALSE}
+#2.1
+install.packages("MASS",
+lib="/Library/Frameworks/R.framework/Versions/3.3/Resources/library/")
+
+install.packages("matrixStats",
+lib="/Library/Frameworks/R.framework/Versions/3.3/Resources/library/")
+```
+
+```{r}
+#2.2
+find.package("MASS")
+find.package("matrixStats")
+```
+
+```{r}
+#3
+15 + 365.25 * (2017 - 1993) - 245
+
+sqrt((3/5) ^ 2 + ((2 ^ 4) / (5 ^ 2)))
+
+1/2 * log(2 * pi * exp(1))
+```
+
+```{r}
+#4
+c(4, 9, 16, 25)
+
+seq(23, 31, 2)
+
+vec3 <- c(2, 0, 4, 6, 3, 1, 5, 4, 1)
+
+vec3[c(3, 5)] <- pi
+vec3
+```
+
+```{r}
+#5
+v <- c("Gen", "2", "pokemons", "are", "coming", "to", "la la land")
+
+#class(v[2])
+#No we cannot, because v[2]'s type is char, which means it cannot be added with 2, a integer.
+```
+
+```{r}
+#6
+matrix(seq(11, 41, 2), nrow = 4, ncol =4)
+
+matrix(seq(11, 41, 2), nrow = 4, ncol =4)[ , 3]
+
+matrix(seq(11, 41, 2), nrow = 4, ncol =4)[2, , drop = FALSE]
+```
+
+```{r}
+#7
+data()
+
+data(iris)
+#I see <Promise>
+
+class(iris)
+#It outputs the abstract type of the argument, which is data.frame for iris.
+
+mode(iris)
+#It outputs how the argument is stored in the memory, which is list for iris.
+``` 
+
+```{r}
+#8
+r <- c(87, 101, 108, 99, 111, 109, 101, 32, 116, 111, 32, 83, 116, 97, 116, 115, 50, 48,
+33, 32, 89, 111, 117, 32, 97, 114, 101, 32, 97, 119, 101, 115, 111, 109, 101, 33)
+
+rw <- as.raw(r)
+
+rawToChar(rw) 
+```

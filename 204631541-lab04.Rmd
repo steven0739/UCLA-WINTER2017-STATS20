@@ -1,0 +1,118 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+#1.a
+load("NBA16BOX.Rdata")
+tapply <- tapply(nba16$HomePoints, nba16$HomeTeam, FUN = mean)
+tapply
+aggre <- aggregate(nba16$HomePoints, list(nba16$HomeTeam), mean)
+aggre
+aggre[which(aggre$x == max(aggre$x)), ]
+```
+Golden State Warriors has the highest average home points of 114.3455.
+
+```{r}
+#1.b
+nba16$HomeWins <- nba16$HomePoints > nba16$VisitorPoints
+homewins_tapp <- tapply(nba16$HomeWins, list(nba16$HomeTeam,nba16$Playoffs), sum)
+homewins_tapp
+homewins_agg <- aggregate(nba16$HomeWins, list(nba16$HomeTeam,nba16$Playoffs), sum)
+homewins_agg
+```
+
+```{r}
+#1.c
+onec <- c(rep("playoffs",30),rep("regular season",30))
+TtoA <- data.frame(HomeTeam=dimnames(homewins_tapp)[[1]], Playoffs = onec, sum = as.numeric(homewins_tapp))
+na.omit(TtoA)
+```
+
+```{r}
+#1.d
+multi_agg <- aggregate(cbind(nba16$HomePoint, nba16$VisitorPoints), by = c(list(nba16$HomeTeam), list(nba16$Playoffs)), mean)
+reg_multi_agg <- subset(multi_agg, multi_agg$Group.2 == "Regular Season")
+reg_multi_agg[which(reg_multi_agg$V2 == min(reg_multi_agg$V2, na.rm = T)), ]
+```
+San Antonio Spurs is the best defensive team at home in the regular season.
+
+```{r}
+#2.a
+set.seed(2017)
+v <- rnorm(100, 2, 1)
+hist(v, freq = F, breaks = 20)
+lines(density(v), col = 'blue')
+x <- seq(-1, 10, length = 100)
+y <- dnorm(x, mean = 2, sd = 1)
+lines(x, y, col = 'red')
+legend('topright', lty= 1, col = c('blue','red'), c('density','dnorm'))
+```
+
+```{r}
+#2.b
+set.seed(2017)
+v <- rnorm(50000, 2, 1)
+m <- matrix(v, nrow = 100, ncol = 500)
+
+par(mfcol = c(1, 2))
+hist(m[ , 94],freq = F,breaks = 10)
+lines(density(m[ , 94]), col = 'blue')
+x <- seq(-1, 5, length = 100)
+y <- dnorm(x, 2, 1)
+lines(x, y, col = 'red')
+legend('topright', lty= 1, col = c('blue','red'), c('density','dnorm(2, 1)'), cex = 0.6, bg = "transparent")
+
+hist(m[ , 87], freq = F, breaks = 10)
+lines(density(m[, 87]), col = 'blue')
+lines(x, y, col = 'red')
+legend('topright', lty= 1, col = c('blue','red'), c('density','dnorm(2, 1)'), cex = 0.6, bg = "transparent")
+```
+
+```{r}
+#2.c
+sample_means <- apply(as.data.frame(m), 2, mean)
+sample_sd <- apply(as.data.frame(m), 2, sd)
+hist(sample_means, freq = F)
+hist(sample_sd, freq = F)
+mean(sample_means)
+sd(sample_means)
+mean(sample_sd)
+```
+Yes, it looks like normally distributed. The average value for the sample means is 1.997506 and the average value for the sample standard deviation is 0.997134. The standard deviation of the sample means is 0.09716645.
+
+```{r}
+#3.a
+set.seed(2017)
+a <- rbinom(1000, 1, 0.4)
+table(a)
+```
+
+```{r}
+#3.b
+set.seed(2017)
+u <- runif(1000, min = 0, max = 1)
+b <- as.numeric(u >= (1 - 0.4))
+table(b)
+table(a,b)
+```
+Both of them have 615 0s and 385 1s.
+
+```{r}
+#3.c
+runif(1000, min = 1, max = 10)
+threec <- runif(1000, min = 0, max = 10)
+#threec
+ceiling(threec)
+```
+
+
+
+
+
+
+
+
+
+

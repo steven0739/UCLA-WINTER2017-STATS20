@@ -1,0 +1,102 @@
+---
+title: "Lab2"
+output: html_document
+---
+
+```{r}
+#1.1
+load(url("http://www.stat.ucla.edu/~vlew/datasets/hiucpay2014.RData"))
+
+#1.2
+str(hiuc2014)
+
+#1.3
+#variable Year has int type
+```
+
+```{r, eval = FALSE}
+#1.4
+save(hiuc2014,file = '1d.Rdata')
+```
+
+```{r}
+library(haven)
+```
+
+```{r}
+#2.1
+load2.1 <- read_sav(url("http://www.sjsu.edu/people/carlos.e.garcia/courses/soci104/Course-Assignments/104data_2014.sav"))
+
+twoone <- apply(is.na(load2.1), 2, sum)
+twoone[c(twoone > 1900)]
+```
+```{r}
+#2.2
+load2.2 <- read_dta(url("http://qcpages.qc.cuny.edu/~rvesselinov/statadata/WAGEPAN.DTA"))
+head(load2.2, n = 8L)
+```
+```{r}
+#2.3
+load2.3 <- read_sas(url("http://biostat3.net/download/sas/colon.sas7bdat"))
+tail(load2.3, n = 10L)
+```
+```{r}
+#2.4
+readLines(url("https://extranet.who.int/tme/generateCSV.asp?ds=estimates"), 5)
+load2.4 <- read.csv(url("https://extranet.who.int/tme/generateCSV.asp?ds=estimates"), header = TRUE)
+load2.4
+```
+```{r}
+#2.5
+readLines(url("http://www.gbcnv.edu/bookstore/2016-Spring.txt"), 5)
+load2.5 <- read.table(url("https://extranet.who.int/tme/generateCSV.asp?ds=estimates"), sep = '\t')
+load2.5
+```
+
+```{r, eval = FALSE}
+#3.1
+write.table(load2.1, "2a.txt", sep = '\t', quote = TRUE, row.names = FALSE)
+```
+```{r, eval = FALSE}
+#3.2
+write.csv(load2.4, "2d.csv", sep = ',', quote = TRUE, row.names = FALSE)
+```
+
+```{r}
+#3.3
+model1 <- lm(iris$Petal.Width ~ iris$Petal.Length + iris$Sepal.Length)
+summary(model1)
+
+#3.4
+#class(model1)
+#mode(model1)
+#coef(model1)
+model1[["coefficients"]]
+
+#3.5
+model1$coefficients
+```
+
+```{r}
+library(rvest)
+```
+
+```{r}
+#4.1
+tbbt <- read_html("https://en.wikipedia.org/wiki/List_of_The_Big_Bang_Theory_episodes")
+html_nodes(tbbt, 'table')
+#there is an error since elements in the first row are not single, some boxes have more than one
+```
+```{r}
+#4.2
+tbbt.table1 <- html_table(html_nodes(tbbt, 'table')[[1]], fill = TRUE)
+```
+```{r}
+#4.3
+tbbt.remove <- tbbt.table1[-1, -c(1,3)]
+tbbt.remove
+```
+```{r}
+#4.4
+subset(tbbt.remove, tbbt.remove$Episodes == 23)
+```

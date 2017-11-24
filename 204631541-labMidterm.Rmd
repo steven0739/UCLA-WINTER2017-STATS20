@@ -1,0 +1,126 @@
+---
+title: "204631541-labMidterm"
+output: html_document
+---
+
+```{r}
+#1.1
+kobe <- read.table("Kobe_1A.txt", header = TRUE, sep = ",", quote = "\"")
+nrow(kobe)
+```
+There's 9549 rows.
+
+```{r}
+#1.2
+table(kobe$shot_type)
+```
+2: 7719
+3: 1830
+
+```{r}
+#1.3
+seasonShot <- barplot(table(kobe$season), beside = TRUE, col = c('red', 'blue', 'green', 'yellow', 'pink'))
+which.max(seasonShot)
+```
+2005-2006
+
+```{r}
+#1.4
+hist(table(kobe$game_date))
+medianShot <- median(table(kobe$game_date))
+abline(v = mean(table(kobe$game_date)), col = 'red')
+```
+
+22
+
+
+```{r}
+#2.1
+burger <- read.csv("Burgers_1A.csv", header = TRUE, sep = ",", quote = "\"")
+sum(is.na(burger))
+```
+1126
+
+```{r}
+#2.2
+plot(burger$categories, burger$review_count, col = c('red', 'blue', 'yellow'))
+```
+
+newamerican
+
+```{r}
+#2.3
+rest <- burger[burger$review_count >= 40, ]
+table(factor(rest$categories))
+```
+burgers: 177
+newamerican: 143
+tradamerican: 79
+
+```{r}
+#2.4
+subBurger <- burger[burger$categories == 'burgers', ]
+max(subBurger$rating)
+subBurger[subBurger$rating == 5, ]
+```
+5
+
+
+```{r}
+#3.1
+homework <- read.csv(url("http://ieor.berkeley.edu/~ieor265/homeworks/winequality-red.csv"), header = TRUE, sep = ";", quote = "\"")
+ncol(homework)
+```
+12
+
+```{r}
+#3.2
+cor(homework$fixed.acidity, homework$pH)
+plot(x = homework$pH, y = homework$fixed.acidity)
+```
+
+-0.6829782
+
+```{r}
+#3.3
+homework$fixed.acidity.log2 <- log(homework$fixed.acidity)
+```
+
+```{r}
+#3.4
+cor(homework$fixed.acidity.log2, homework$pH)
+plot(x = homework$pH, y = homework$fixed.acidity.log2)
+```
+
+|-0.7063602| > |-0.6829782|, yes
+
+
+```{r}
+#4.1
+movies <- load("Movies_1A.RData")
+movies
+```
+"moviesA" 
+"moviesB"
+
+```{r}
+#4.2
+allMovies <- rbind(moviesA, moviesB)
+nrow(allMovies)
+```
+1277
+
+```{r}
+#4.3
+allMovies$OPEN <- as.Date(allMovies$OPEN, format = "%m/%d/%Y")
+allMovies$CLOSE <- as.Date(allMovies$CLOSE, format = "%m/%d/%Y")
+allMovies$RUN <- (allMovies$CLOSE - allMovies$OPEN)
+max(allMovies$RUN)
+```
+356 days
+
+```{r}
+#4.4
+max(newTG <- gsub("\\$|,", '', allMovies$TOTGROSS))
+```
+98925640
